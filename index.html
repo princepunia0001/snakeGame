@@ -382,6 +382,105 @@
                 width: 100%;
             }
         }
+        /* 💡 Your existing CSS before media queries remains as is */
+
+@media (max-width: 1024px) {
+    .game-board {
+        width: 500px;
+        height: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .game-layout {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .game-board {
+        width: 360px;
+        height: 360px;
+    }
+
+    .controls-panel {
+        width: 100%;
+        margin-top: 20px;
+    }
+
+    .game-container {
+        padding: 20px;
+    }
+
+    .game-title {
+        font-size: 2em;
+    }
+
+    .game-subtitle {
+        font-size: 1em;
+    }
+
+    .board-cell {
+        font-size: 10px;
+    }
+
+    .dice {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5em;
+    }
+
+    .btn {
+        padding: 10px 16px;
+        font-size: 0.9em;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-board {
+        width: 300px;
+        height: 300px;
+    }
+
+    .game-title {
+        font-size: 1.5em;
+    }
+
+    .game-subtitle {
+        font-size: 0.9em;
+    }
+
+    .board-cell {
+        font-size: 9px;
+    }
+
+    .player-name, .stat-label {
+        font-size: 0.9em;
+    }
+
+    .stat-value {
+        font-size: 1.2em;
+    }
+
+    .dice {
+        width: 50px;
+        height: 50px;
+        font-size: 1.2em;
+    }
+
+    .btn {
+        padding: 8px 14px;
+        font-size: 0.85em;
+    }
+
+    .winner-content {
+        padding: 20px;
+    }
+
+    .winner-title {
+        font-size: 1.8em;
+    }
+}
+
     </style>
 </head>
 <body>
