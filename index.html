@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snakes and Ladders Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .game-title {
+            font-size: 3em;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .game-subtitle {
+            color: #666;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+
+        .game-layout {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        .board-container {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 2px;
+            width: 600px;
+            height: 600px;
+            background: #f8f9fa;
+            border: 3px solid #333;
+            border-radius: 15px;
+            padding: 10px;
+        }
+
+        .board-cell {
+            background: white;
+            border: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .board-cell:hover {
+            background: #f0f8ff;
+            transform: scale(1.05);
+        }
+
+        .board-cell.snake-head {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .board-cell.snake-tail {
+            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+            color: white;
+        }
+
+        .board-cell.ladder-bottom {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .board-cell.ladder-top {
+            background: linear-gradient(135deg, #96ceb4, #ffecd2);
+            color: #333;
+        }
+
+        .board-cell.start {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .board-cell.finish {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #333;
+        }
+
+        .player-piece {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+            animation: pulse 2s infinite;
+        }
+
+        .player-piece.player {
+            background: #4ecdc4;
+            box-shadow: 0 2px 10px rgba(78, 205, 196, 0.5);
+        }
+
+        .player-piece.bot {
+            background: #ff6b6b;
+            box-shadow: 0 2px 10px rgba(255, 107, 107, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: translate(-50%, -50%) scale(1); }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        .snake-icon, .ladder-icon {
+            font-size: 16px;
+            position: absolute;
+            top: 2px;
+            right: 2px;
+        }
+
+        .controls-panel {
+            width: 300px;
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .player-info {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 5px solid #4ecdc4;
+        }
+
+        .player-info.bot {
+            border-left-color: #ff6b6b;
+        }
+
+        .player-name {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .player-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #4ecdc4;
+        }
+
+        .stat-value.bot {
+            color: #ff6b6b;
+        }
+
+        .current-turn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .dice-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .dice {
+            width: 80px;
+            height: 80px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 15px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dice.rolling {
+            animation: rollDice 0.5s ease-in-out;
+        }
+
+        @keyframes rollDice {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg); }
+            50% { transform: rotate(180deg); }
+            75% { transform: rotate(270deg); }
+        }
+
+        .control-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .game-log {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .log-item {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 0.9em;
+        }
+
+        .log-item.player {
+            background: rgba(78, 205, 196, 0.1);
+            border-left: 3px solid #4ecdc4;
+        }
+
+        .log-item.bot {
+            background: rgba(255, 107, 107, 0.1);
+            border-left: 3px solid #ff6b6b;
+        }
+
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .winner-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            animation: winnerPop 0.5s ease-out;
+        }
+
+        @keyframes winnerPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .winner-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        @media (max-width: 768px) {
+            .game-layout {
+                flex-direction: column;
+            }
+            
+            .game-board {
+                width: 400px;
+                height: 400px;
+            }
+            
+            .controls-panel {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <h1 class="game-title">🐍 SNAKES & LADDERS 🪜</h1>
+            <p class="game-subtitle">Classic Board Game - Player vs Bot</p>
+        </div>
+
+        <div class="game-layout">
+            <div class="board-container">
+                <div class="game-board" id="gameBoard"></div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="current-turn" id="currentTurn">
+                    Your Turn - Roll the Dice!
+                </div>
+
+                <div class="player-info">
+                    <div class="player-name">👤 Player</div>
+                    <div class="player-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Position</div>
+                            <div class="stat-value" id="playerPosition">1</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Moves</div>
+                            <div class="stat-value" id="playerMoves">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="player-info bot">
+                    <div class="player-name">🤖 Bot</div>
+                    <div class="player-stats">
+                        <div class="stat-item">
+                            <div class="stat-label">Position</div>
+                            <div class="stat-value bot" id="botPosition">1</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Moves</div>
+                            <div class="stat-value bot" id="botMoves">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dice-container">
+                    <div class="dice" id="dice">🎲</div>
+                    <div class="control-buttons">
+                        <button class="btn btn-primary" id="rollBtn" onclick="rollDice()">Roll Dice</button>
+                        <button class="btn btn-secondary" onclick="resetGame()">New Game</button>
+                    </div>
+                </div>
+
+                <div class="game-log" id="gameLog">
+                    <div class="log-item">Welcome to Snakes and Ladders!</div>
+                    <div class="log-item">Roll the dice to start your journey to square 100!</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="winner-overlay" id="winnerOverlay">
+        <div class="winner-content">
+            <div class="winner-title" id="winnerTitle">🏆 WINNER! 🏆</div>
+            <div class="winner-message" id="winnerMessage"></div>
+            <button class="btn btn-primary" onclick="resetGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let currentPlayer = 'player';
+        let gameOver = false;
+        let players = {
+            player: { position: 1, moves: 0 },
+            bot: { position: 1, moves: 0 }
+        };
+
+        // Snakes and Ladders positions
+        const snakes = {
+            16: 6, 47: 26, 49: 11, 56: 53, 62: 19, 64: 60, 87: 24, 93: 73, 95: 75, 98: 78
+        };
+
+        const ladders = {
+            1: 38, 4: 14, 9: 21, 21: 42, 28: 84, 36: 44, 51: 67, 71: 91, 80: 100
+        };
+
+        function initGame() {
+            currentPlayer = 'player';
+            gameOver = false;
+            players = {
+                player: { position: 1, moves: 0 },
+                bot: { position: 1, moves: 0 }
+            };
+            
+            createBoard();
+            updateDisplay();
+            updateStats();
+            clearLog();
+            addLogItem('Game started! Roll the dice to begin!');
+            
+            document.getElementById('rollBtn').disabled = false;
+            document.getElementById('winnerOverlay').style.display = 'none';
+        }
+
+        function createBoard() {
+            const board = document.getElementById('gameBoard');
+            board.innerHTML = '';
+
+            // Create 100 cells (10x10 grid)
+            for (let row = 0; row < 10; row++) {
+                for (let col = 0; col < 10; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'board-cell';
+                    
+                    // Calculate cell number (snake pattern)
+                    let cellNumber;
+                    if (row % 2 === 0) {
+                        cellNumber = (9 - row) * 10 + col + 1;
+                    } else {
+                        cellNumber = (9 - row) * 10 + (9 - col) + 1;
+                    }
+                    
+                    cell.textContent = cellNumber;
+                    cell.dataset.number = cellNumber;
+                    
+                    // Style special cells
+                    if (cellNumber === 1) {
+                        cell.classList.add('start');
+                    } else if (cellNumber === 100) {
+                        cell.classList.add('finish');
+                    } else if (snakes[cellNumber]) {
+                        cell.classList.add('snake-head');
+                        cell.innerHTML = `${cellNumber}<span class="snake-icon">🐍</span>`;
+                    } else if (Object.values(snakes).includes(cellNumber)) {
+                        cell.classList.add('snake-tail');
+                        cell.innerHTML = `${cellNumber}<span class="snake-icon">🐍</span>`;
+                    } else if (ladders[cellNumber]) {
+                        cell.classList.add('ladder-bottom');
+                        cell.innerHTML = `${cellNumber}<span class="ladder-icon">🪜</span>`;
+                    } else if (Object.values(ladders).includes(cellNumber)) {
+                        cell.classList.add('ladder-top');
+                        cell.innerHTML = `${cellNumber}<span class="ladder-icon">🪜</span>`;
+                    }
+                    
+                    board.appendChild(cell);
+                }
+            }
+            
+            // Place player pieces
+            updatePlayerPositions();
+        }
+
+        function updatePlayerPositions() {
+            // Remove existing pieces
+            document.querySelectorAll('.player-piece').forEach(piece => piece.remove());
+            
+            // Add player pieces
+            const playerCell = document.querySelector(`[data-number="${players.player.position}"]`);
+            const botCell = document.querySelector(`[data-number="${players.bot.position}"]`);
+            
+            if (playerCell) {
+                const playerPiece = document.createElement('div');
+                playerPiece.className = 'player-piece player';
+                playerCell.appendChild(playerPiece);
+            }
+            
+            if (botCell) {
+                const botPiece = document.createElement('div');
+                botPiece.className = 'player-piece bot';
+                botCell.appendChild(botPiece);
+            }
+        }
+
+        function rollDice() {
+            if (gameOver) return;
+            
+            const dice = document.getElementById('dice');
+            const rollBtn = document.getElementById('rollBtn');
+            
+            // Animate dice roll
+            dice.classList.add('rolling');
+            rollBtn.disabled = true;
+            
+            setTimeout(() => {
+                const diceValue = Math.floor(Math.random() * 6) + 1;
+                dice.textContent = diceValue;
+                dice.classList.remove('rolling');
+                
+                movePlayer(currentPlayer, diceValue);
+                
+                if (!gameOver) {
+                    setTimeout(() => {
+                        switchPlayer();
+                    }, 1500);
+                }
+            }, 500);
+        }
+
+        function movePlayer(player, diceValue) {
+            const oldPosition = players[player].position;
+            let newPosition = oldPosition + diceValue;
+            
+            // Check if player overshoots 100
+            if (newPosition > 100) {
+                newPosition = 100 - (newPosition - 100);
+            }
+            
+            players[player].position = newPosition;
+            players[player].moves++;
+            
+            // Check for snakes and ladders
+            let message = `${player === 'player' ? 'You' : 'Bot'} rolled ${diceValue} and moved to square ${newPosition}`;
+            
+            if (snakes[newPosition]) {
+                const snakeEnd = snakes[newPosition];
+                players[player].position = snakeEnd;
+                message += ` 🐍 Oh no! Snake bit you! Slide down to square ${snakeEnd}`;
+                addLogItem(message, player);
+            } else if (ladders[newPosition]) {
+                const ladderEnd = ladders[newPosition];
+                players[player].position = ladderEnd;
+                message += ` 🪜 Lucky! Climb the ladder to square ${ladderEnd}`;
+                addLogItem(message, player);
+            } else {
+                addLogItem(message, player);
+            }
+            
+            updatePlayerPositions();
+            updateStats();
+            
+            // Check for winner
+            if (players[player].position === 100) {
+                endGame(player);
+            }
+        }
+
+        function switchPlayer() {
+            if (gameOver) return;
+            
+            currentPlayer = currentPlayer === 'player' ? 'bot' : 'player';
+            updateDisplay();
+            
+            if (currentPlayer === 'bot') {
+                document.getElementById('rollBtn').disabled = true;
+                setTimeout(() => {
+                    rollDice();
+                }, 1000);
+            } else {
+                document.getElementById('rollBtn').disabled = false;
+            }
+        }
+
+        function updateDisplay() {
+            const turnElement = document.getElementById('currentTurn');
+            if (currentPlayer === 'player') {
+                turnElement.textContent = 'Your Turn - Roll the Dice!';
+                turnElement.style.background = 'linear-gradient(135deg, #4ecdc4, #44a08d)';
+            } else {
+                turnElement.textContent = 'Bot\'s Turn - Thinking...';
+                turnElement.style.background = 'linear-gradient(135deg, #ff6b6b, #ee5a52)';
+            }
+        }
+
+        function updateStats() {
+            document.getElementById('playerPosition').textContent = players.player.position;
+            document.getElementById('playerMoves').textContent = players.player.moves;
+            document.getElementById('botPosition').textContent = players.bot.position;
+            document.getElementById('botMoves').textContent = players.bot.moves;
+        }
+
+        function addLogItem(message, player = null) {
+            const log = document.getElementById('gameLog');
+            const logItem = document.createElement('div');
+            logItem.className = `log-item ${player || ''}`;
+            logItem.textContent = message;
+            log.appendChild(logItem);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('gameLog').innerHTML = '';
+        }
+
+        function endGame(winner) {
+            gameOver = true;
+            document.getElementById('rollBtn').disabled = true;
+            
+            const overlay = document.getElementById('winnerOverlay');
+            const title = document.getElementById('winnerTitle');
+            const message = document.getElementById('winnerMessage');
+            
+            if (winner === 'player') {
+                title.textContent = '🏆 CONGRATULATIONS! 🏆';
+                title.style.color = '#4ecdc4';
+                message.innerHTML = `
+                    <p>You won the game!</p>
+                    <p>Total moves: ${players.player.moves}</p>
+                    <p>Bot moves: ${players.bot.moves}</p>
+                `;
+                addLogItem('🎉 You won! Congratulations!', 'player');
+            } else {
+                title.textContent = '🤖 BOT WINS! 🤖';
+                title.style.color = '#ff6b6b';
+                message.innerHTML = `
+                    <p>Bot won the game!</p>
+                    <p>Your moves: ${players.player.moves}</p>
+                    <p>Bot moves: ${players.bot.moves}</p>
+                `;
+                addLogItem('🤖 Bot won! Better luck next time!', 'bot');
+            }
+            
+            overlay.style.display = 'flex';
+        }
+
+        function resetGame() {
+            initGame();
+        }
+
+        // Initialize game
+        initGame();
+    </script>
+</body>
+</html>
